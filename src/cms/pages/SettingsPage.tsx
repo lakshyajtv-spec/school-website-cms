@@ -36,7 +36,9 @@ function ImagePicker({
     setBusy(true);
     const tId = toast.loading("Uploading…");
     try {
-      const newUrl = await uploadImage(f, folder);
+      const newUrl = await uploadImage(f, folder, (progress) =>
+        toast.loading(`Uploading… ${Math.round(progress)}%`, { id: tId }),
+      );
       onChange(newUrl);
       toast.success("Uploaded", { id: tId });
     } catch (err) {

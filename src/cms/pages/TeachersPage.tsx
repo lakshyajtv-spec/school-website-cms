@@ -105,7 +105,9 @@ export default function TeachersPage() {
     setUploading(true);
     const tId = toast.loading("Uploading photo…");
     try {
-      const url = await uploadImage(file, "teachers");
+      const url = await uploadImage(file, "teachers", (progress) =>
+        toast.loading(`Uploading photo… ${Math.round(progress)}%`, { id: tId }),
+      );
       setEditing({ ...editing, photo: url });
       toast.success("Photo uploaded", { id: tId });
     } catch (err) {

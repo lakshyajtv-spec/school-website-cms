@@ -91,7 +91,11 @@ export function FieldEditor({
       setUploading(true);
       const toastId = toast.loading("Uploading image…");
       try {
-        const url = await uploadImage(file, field.folder);
+        const url = await uploadImage(file, field.folder, (progress) =>
+          toast.loading(`Uploading image… ${Math.round(progress)}%`, {
+            id: toastId,
+          }),
+        );
         onChange(setPathImmutable(obj, field.path, url));
         toast.success("Image uploaded", { id: toastId });
       } catch (error) {

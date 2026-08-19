@@ -4,6 +4,10 @@ Create one Appwrite project, one database, and one bucket. Add Web platforms
 for `localhost` and the Vercel production domain. Never create a frontend API
 key; the Web SDK uses the project ID and Account session.
 
+> Automation: everything below can be checked with `npm run verify:appwrite`
+> and created with `npm run setup:appwrite -- --apply`
+> (reads a local, git-ignored `.env.setup` containing `APPWRITE_API_KEY`).
+
 ## Authentication
 
 Create admin users in **Auth → Users**. Disable public registration in project
