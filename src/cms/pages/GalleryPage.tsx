@@ -69,9 +69,16 @@ export default function GalleryPage() {
     setUploading(true);
     const tId = toast.loading(`Uploading ${files.length} image(s)…`);
     const records: GalleryRecord[] = [];
-    for (const file of Array.from(files).slice(0, 8)) {
+    const queue = Array.from(files).slice(0, 8);
+    for (let i = 0; i < queue.length; i++) {
+      const file = queue[i];
       try {
-        const url = await uploadImage(file, "gallery");
+        const url = await uploadImage(file, "gallery", (progress) =>
+          toast.loading(
+            `Uploading image ${i + 1}/${queue.length} (${file.name})… ${Math.round(progress)}%`,
+            { id: tId },
+          ),
+        );
         records.push({
           ...emptyRecord(),
           src: url,
@@ -95,7 +102,9 @@ export default function GalleryPage() {
     if (!file || !editing) return;
     const tId = toast.loading("Replacing image…");
     try {
-      const newUrl = await uploadImage(file, "gallery");
+      const newUrl = await uploadImage(file, "gallery", (progress) =>
+        toast.loading(`Replacing image… ${Math.round(progress)}%`, { id: tId }),
+      );
       setEditing({ ...editing, src: newUrl });
       toast.success("Image replaced", { id: tId });
     } catch (error) {

@@ -29,11 +29,29 @@ Node.js 20+ is recommended (`.nvmrc` is included).
 The browser cannot securely create Appwrite databases or buckets because that
 requires a server API key. No API key is included in this repository.
 
-Create the resources once using Appwrite Console. The exact collection,
-attribute, index, permission and bucket specification is in:
+Create the resources once using Appwrite Console or the setup script below.
+The exact collection, attribute, index, permission and bucket specification is
+in:
 
 - `appwrite/schema.json`
 - `appwrite/SETUP.md`
+
+## Verification & setup scripts
+
+```bash
+# Check env vars, secrets hygiene, files, packages, schema consistency and
+# (online) the live endpoint, database, collections and bucket.
+npm run verify:appwrite
+
+# Report what is missing in Appwrite (read-only, needs .env.setup):
+npm run setup:appwrite
+# Create the missing database/collections/attributes/indexes/bucket:
+npm run setup:appwrite -- --apply
+```
+
+`scripts/setup-appwrite.cjs` reads the API key from a local, git-ignored
+`.env.setup` file (`APPWRITE_API_KEY=...`), never prints it and only CREATES
+missing resources — it never deletes or overwrites anything.
 
 Create trusted administrators under **Auth → Users** and disable public user
 registration. Login uses Appwrite email/password sessions. No admin password is

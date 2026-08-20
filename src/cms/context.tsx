@@ -63,7 +63,8 @@ export function logActivity(text: string) {
 interface CmsCtx {
   authed: boolean;
   authLoading: boolean;
-  login: (email: string, pass: string) => Promise<boolean>;
+  /** Returns null on success, or the exact Appwrite error message on failure. */
+  login: (email: string, pass: string) => Promise<string | null>;
   logout: () => Promise<void>;
   /** Fetched live site data (TanStack Query). */
   siteData: SiteData | undefined;
@@ -85,6 +86,11 @@ interface CmsCtx {
 
 const CmsContext = createContext<CmsCtx | null>(null);
 
+function courseImages(lang: { vocational: { subjects: unknown } }): string[] {
+  const subjects = lang.vocational.subjects as Array<{ image?: string }> | undefined;
+  return (subjects ?? []).map((c) => c.image ?? "");
+}
+
 function storageUrls(data: SiteData): Set<string> {
   const candidates = [
     data.settings.logo,
@@ -96,8 +102,20 @@ function storageUrls(data: SiteData): Set<string> {
     data.images.aboutB,
     ...data.teachers.map((t) => t.photo),
     ...data.gallery.map((g) => g.src),
+    ...courseImages(data.en),
+    ...courseImages(data.hi),
   ];
   return new Set(candidates.filter((url) => url && fileIdFromUrl(url)));
+}
+
+/** True when an Appwrite request failed because the session is gone/expired. */
+function isSessionExpiredError(error: unknown): boolean {
+  return Boolean(
+    error &&
+      typeof error === "object" &&
+      "code" in error &&
+      Number((error as { code?: unknown }).code) === 401,
+  );
 }
 
 export function CmsProvider({ children }: { children: ReactNode }) {
@@ -165,8 +183,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, pass: string) => {
     if (!account) {
-      toast.error("Appwrite is not configured");
-      return false;
+      return "Appwrite is not configured — check the VITE_APPWRITE_* environment variables";
     }
     try {
       await account.createEmailPasswordSession({
@@ -176,10 +193,14 @@ export function CmsProvider({ children }: { children: ReactNode }) {
       await account.get();
       setAuthed(true);
       logActivity("Admin logged in");
-      return true;
+      return null;
     } catch (error) {
       console.error("[cms/auth] Login failed:", error);
-      return false;
+      const message = error instanceof Error ? error.message : String(error ?? "");
+      return (
+        message.trim() ||
+        "Could not create a session. Check the email, password and Appwrite project configuration."
+      );
     }
   }, []);
 
@@ -227,10 +248,15 @@ export function CmsProvider({ children }: { children: ReactNode }) {
       await queryClient.invalidateQueries({ queryKey: ["cms-site"] });
     } catch (err) {
       console.error("[cms] Publish error:", err);
-      toast.error(
-        `Publish failed — ${err instanceof Error ? err.message : String(err)}`,
-        { id: tId },
-      );
+      if (isSessionExpiredError(err)) {
+        setAuthed(false);
+        toast.error("Session expired — please sign in again", { id: tId });
+      } else {
+        toast.error(
+          `Publish failed — ${err instanceof Error ? err.message : String(err)}`,
+          { id: tId },
+        );
+      }
     } finally {
       setPublishing(false);
     }
@@ -264,7 +290,15 @@ export function CmsProvider({ children }: { children: ReactNode }) {
       logActivity("Reset all content");
     } catch (err) {
       console.error("[cms] Reset error:", err);
-      toast.error("Reset failed", { id: tId });
+      if (isSessionExpiredError(err)) {
+        setAuthed(false);
+        toast.error("Session expired — please sign in again", { id: tId });
+      } else {
+        toast.error(
+          `Reset failed — ${err instanceof Error ? err.message : String(err)}`,
+          { id: tId },
+        );
+      }
     }
   }, [saveSiteData, queryClient]);
 
@@ -282,10 +316,15 @@ export function CmsProvider({ children }: { children: ReactNode }) {
       logActivity("Initialized website content");
     } catch (error) {
       console.error("[cms] Initialization failed:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Initialization failed",
-        { id: tId },
-      );
+      if (isSessionExpiredError(error)) {
+        setAuthed(false);
+        toast.error("Session expired — please sign in again", { id: tId });
+      } else {
+        toast.error(
+          error instanceof Error ? error.message : "Initialization failed",
+          { id: tId },
+        );
+      }
     }
   }, [saveSiteData, queryClient]);
 

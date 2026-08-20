@@ -13,6 +13,8 @@ import { defaultSiteData } from "@/cms/lib/types";
 export interface PublishResult {
   ok: boolean;
   error?: string;
+  /** Appwrite HTTP error code (e.g. 401 for an expired session), when known. */
+  code?: number;
 }
 
 type Doc = Models.Document & Record<string, any>;
@@ -572,6 +574,10 @@ export async function publishSiteData(data: SiteData): Promise<PublishResult> {
     return {
       ok: false,
       error: `${operation}: ${error instanceof Error ? error.message : String(error)}`,
+      code:
+        error && typeof error === "object" && "code" in error
+          ? Number((error as { code: unknown }).code)
+          : undefined,
     };
   }
 }

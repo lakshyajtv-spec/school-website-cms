@@ -1,10 +1,14 @@
+# Dependencies / build output
 node_modules/
 dist/
 .vercel/
+
+# Environment files — ignore everything except the public example.
+# This also covers .env.setup (local Appwrite API key, never committed).
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+
+# Misc
 *.log
 .DS_Store
-.env.setup
-.env.production

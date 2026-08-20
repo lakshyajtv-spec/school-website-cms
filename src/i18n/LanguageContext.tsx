@@ -74,10 +74,18 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       })
       .catch((err) => {
         console.error("[LanguageProvider] Content load failed:", err);
-        if (!cancelled) {
-          setDataError(err instanceof Error ? err.message : String(err));
+        if (cancelled) return;
+        const message = err instanceof Error ? err.message : String(err);
+        if (message.includes("not initialized")) {
+          // The backend is reachable but has no published content yet.
+          // Render the bundled bilingual defaults instead of an error wall;
+          // the admin panel still offers "Initialize Website".
+          setDataError(null);
           setDataReady(true);
+          return;
         }
+        setDataError(message);
+        setDataReady(true);
       });
     return () => {
       cancelled = true;
@@ -110,7 +118,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   /** Publish to Appwrite; on success the whole site updates instantly. */
   const saveSiteData = useCallback(async (d: SiteData): Promise<void> => {
     const res = await publishSiteData(d);
-    if (!res.ok) throw new Error(res.error || "Appwrite publish failed");
+    if (!res.ok) {
+      const err = new Error(res.error || "Appwrite publish failed") as Error & {
+        code?: number;
+      };
+      err.code = res.code;
+      throw err;
+    }
     setSiteData(d);
     setDataError(null);
     setDataReady(true);

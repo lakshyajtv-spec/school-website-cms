@@ -23,18 +23,19 @@ export default function Login() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return; // prevent duplicate submissions
     if (!email.trim() || !pass) {
       setError(true);
       return;
     }
     setLoading(true);
     setError(false);
-    window.setTimeout(async () => {
-      const ok = await login(email.trim(), pass);
+    void (async () => {
+      const errorMessage = await login(email.trim(), pass);
       setLoading(false);
-      if (!ok) {
+      if (errorMessage) {
         setError(true);
-        toast.error("Invalid Appwrite email or password");
+        toast.error(errorMessage);
       } else {
         try {
           localStorage.setItem("lacms-last-email", email.trim());
@@ -43,7 +44,7 @@ export default function Login() {
         }
         toast.success("Welcome back, Admin");
       }
-    }, 650);
+    })();
   };
 
   return (
