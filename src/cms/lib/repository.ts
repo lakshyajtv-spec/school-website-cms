@@ -526,42 +526,49 @@ function buildPlan(data: SiteData, revision: string) {
   return plan;
 }
 
-export async function publishSiteData(data: SiteData): Promise<PublishResult> {
-  if (!databases) return { ok: false, error: "Appwrite is not configured" };
-  const plan = buildPlan(data, ID.unique());
+type Mutation =
+  | { kind: "delete"; collectionId: string; documentId: string }
+  | { kind: "upsert"; collectionId: string; documentId: string; data: Record<string, unknown> };
+
+const MAX_TRANSACTION_OPERATIONS = 100;
+const TRANSACTION_BATCH_SIZE = 90;
+
+async function applyMutationBatch(mutations: Mutation[]): Promise<void> {
+  if (!databases || mutations.length === 0) return;
+  if (mutations.length > MAX_TRANSACTION_OPERATIONS) {
+    throw new Error(
+      `Internal error: mutation batch contains ${mutations.length} operations; maximum is ${MAX_TRANSACTION_OPERATIONS}`,
+    );
+  }
+
   let transactionId: string | null = null;
   let operation = "create transaction";
   try {
     const transaction = await databases.createTransaction({ ttl: 120 });
     transactionId = transaction.$id;
-    for (const collection of ALL_COLLECTIONS) {
-      operation = `list existing ${collection}`;
-      const existing = await list(collection);
-      const planned = plan.get(collection) ?? [];
-      const wanted = new Set(planned.map((doc) => doc.id));
-      for (const doc of existing.documents.filter((doc) => !wanted.has(doc.$id))) {
-        operation = `delete ${collection}/${doc.$id}`;
+
+    for (const mutation of mutations) {
+      operation = `${mutation.kind} ${mutation.collectionId}/${mutation.documentId}`;
+      if (mutation.kind === "delete") {
         await databases.deleteDocument({
           databaseId: APPWRITE_IDS.database,
-          collectionId: collection,
-          documentId: doc.$id,
+          collectionId: mutation.collectionId,
+          documentId: mutation.documentId,
           transactionId,
         });
-      }
-      for (const doc of planned) {
-        operation = `upsert ${collection}/${doc.id}`;
+      } else {
         await databases.upsertDocument({
           databaseId: APPWRITE_IDS.database,
-          collectionId: collection,
-          documentId: doc.id,
-          data: doc.data,
+          collectionId: mutation.collectionId,
+          documentId: mutation.documentId,
+          data: mutation.data,
           transactionId,
         });
       }
     }
+
     operation = "commit transaction";
     await databases.updateTransaction({ transactionId, commit: true });
-    return { ok: true };
   } catch (error) {
     console.error(`[appwrite/repository] ${operation} failed:`, error);
     if (transactionId) {
@@ -571,9 +578,54 @@ export async function publishSiteData(data: SiteData): Promise<PublishResult> {
         console.error("[appwrite/repository] rollback failed:", rollbackError);
       }
     }
+    throw error;
+  }
+}
+
+export async function publishSiteData(data: SiteData): Promise<PublishResult> {
+  if (!databases) return { ok: false, error: "Appwrite is not configured" };
+  const plan = buildPlan(data, ID.unique());
+  const mutations: Mutation[] = [];
+
+  try {
+    // Build the complete mutation list first, then execute it in separate
+    // committed transactions. Appwrite rejects transaction #101, so keeping
+    // each transaction below the hard 100-operation limit is required.
+    for (const collection of ALL_COLLECTIONS) {
+      const existing = await list(collection);
+      const planned = plan.get(collection) ?? [];
+      const wanted = new Set(planned.map((doc) => doc.id));
+
+      for (const doc of existing.documents.filter((doc) => !wanted.has(doc.$id))) {
+        mutations.push({
+          kind: "delete",
+          collectionId: collection,
+          documentId: doc.$id,
+        });
+      }
+
+      for (const doc of planned) {
+        mutations.push({
+          kind: "upsert",
+          collectionId: collection,
+          documentId: doc.id,
+          data: doc.data,
+        });
+      }
+    }
+
+    for (let offset = 0; offset < mutations.length; offset += TRANSACTION_BATCH_SIZE) {
+      await applyMutationBatch(
+        mutations.slice(offset, offset + TRANSACTION_BATCH_SIZE),
+      );
+    }
+
+    return { ok: true };
+  } catch (error) {
+    console.error("[appwrite/repository] publish failed:", error);
     return {
       ok: false,
-      error: `${operation}: ${error instanceof Error ? error.message : String(error)}`,
+      error: error instanceof Error ? error.message : String(error),
       code:
         error && typeof error === "object" && "code" in error
           ? Number((error as { code: unknown }).code)
