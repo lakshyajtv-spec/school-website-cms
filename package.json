@@ -1,38 +1,34 @@
 {
-  "name": "react-vite-tailwind",
+  "name": "govt-school-website-cms",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "Government School Website with Admin Panel — powered by Appwrite.",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "vite build",
     "preview": "vite preview",
-    "verify:appwrite": "node scripts/verify-appwrite.cjs",
-    "setup:appwrite": "node scripts/setup-appwrite.cjs"
+    "setup:appwrite": "node setup-appwrite.js",
+    "setup:appwrite:apply": "node setup-appwrite.js --apply"
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.6.0",
-    "@tanstack/react-query": "^5.101.4",
-    "appwrite": "^26.2.0",
-    "clsx": "2.1.1",
-    "framer-motion": "^12.42.2",
-    "lucide-react": "^1.27.0",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "react-hook-form": "^7.84.0",
-    "react-hot-toast": "^2.6.0",
-    "tailwind-merge": "3.4.0",
-    "zod": "^4.4.3"
+    "appwrite": "^14.0.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.11.0",
+    "lucide-react": "^0.453.0",
+    "node-appwrite": "^28.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hot-toast": "^2.4.1",
+    "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "4.1.17",
-    "@types/node": "22.19.17",
-    "@types/react": "19.2.7",
-    "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "5.1.1",
-    "tailwindcss": "4.1.17",
-    "typescript": "5.9.3",
-    "vite": "7.3.2",
-    "vite-plugin-singlefile": "2.3.0"
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "tailwindcss": "^4.0.0",
+    "vite": "^5.4.10",
+    "vite-plugin-singlefile": "^2.0.2"
   }
 }

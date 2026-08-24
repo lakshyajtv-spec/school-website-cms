@@ -3,11 +3,12 @@ node_modules/
 dist/
 .vercel/
 
-# Environment files — ignore everything except the public example.
-# This also covers .env.setup (local Appwrite API key, never committed).
+# Environment files — only the public example and the pre-configured .env.local
+# are committed. NEVER commit a file that contains a *new* or *rotated* server
+# secret; rotate the key in Appwrite Console first if you commit one by accident.
 .env
-.env.*
 !.env.example
+!.env.local
 
 # Misc
 *.log
