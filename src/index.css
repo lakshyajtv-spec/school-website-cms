@@ -6,197 +6,177 @@
   --font-heading: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  --color-royal-50: #eef5fc;
-  --color-royal-100: #d7e7f7;
-  --color-royal-200: #aecfef;
-  --color-royal-300: #7cb0e2;
-  --color-royal-400: #4a8ccf;
-  --color-royal-500: #2a6cb0;
-  --color-royal-600: #175a99;
-  --color-royal-700: #0f4c81;
-  --color-royal-800: #0c3c66;
-  --color-royal-900: #082b49;
-  --color-royal-950: #051c30;
+  /* Official government blue palette (inspired by Gov.in / NIC) */
+  --color-gov-50:  #eef3fb;
+  --color-gov-100: #d9e4f4;
+  --color-gov-200: #b2c7e8;
+  --color-gov-300: #7e9fd5;
+  --color-gov-400: #4e78bf;
+  --color-gov-500: #2956a6;
+  --color-gov-600: #1e4586;
+  --color-gov-700: #163b73;   /* primary — official royal blue */
+  --color-gov-800: #122e5a;
+  --color-gov-900: #0d2243;
+  --color-gov-950: #08162c;
 
-  --color-gold-50: #fdf9ed;
+  /* Tricolor accents */
+  --color-saffron: #FF9933;
+  --color-india-green: #138808;
+  --color-navy: #000080;
+  --color-ashoka: #0F4C81;
+
+  /* Gold accents (subtle, for seals/badges) */
+  --color-gold-50:  #fdf9ed;
   --color-gold-100: #f8efd0;
   --color-gold-200: #f0dda1;
   --color-gold-300: #e5c76b;
   --color-gold-400: #d4af37;
   --color-gold-500: #bf982a;
   --color-gold-600: #9c7823;
-  --color-gold-700: #7a5c1f;
-  --color-gold-800: #5c451c;
-  --color-gold-900: #3d2e14;
 
-  --shadow-soft: 0 18px 50px -18px rgba(15, 76, 129, 0.35);
-  --shadow-glass: 0 8px 32px rgba(8, 43, 73, 0.12);
+  --shadow-soft: 0 18px 50px -18px rgba(15, 76, 129, 0.25);
+  --shadow-card: 0 10px 30px -12px rgba(8, 43, 73, 0.18);
 }
+
+/* High-contrast mode — WCAG AAA friendly */
+html.high-contrast {
+  --color-gov-50:  #ffffff;
+  --color-gov-100: #ffffff;
+  --color-gov-200: #ffff00;
+  --color-gov-700: #000000;
+  --color-gov-800: #000000;
+  --color-gov-900: #000000;
+  --color-gov-950: #000000;
+  background: #000 !important;
+  color: #fff !important;
+}
+html.high-contrast * {
+  color: #fff !important;
+  background-color: #000 !important;
+  border-color: #ffff00 !important;
+}
+html.high-contrast a, html.high-contrast button { color: #ffff00 !important; }
 
 @layer base {
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 80px;
+    scroll-padding-top: 90px;
     -webkit-text-size-adjust: 100%;
   }
-
   body {
     font-family: var(--font-body);
     background-color: #f6f9fd;
     color: #0b2137;
     overflow-x: hidden;
   }
-
-  h1,
-  h2,
-  h3 {
+  h1, h2, h3 {
     font-family: var(--font-display);
     font-weight: 800;
     letter-spacing: -0.02em;
   }
+  h4, h5, h6 { font-family: var(--font-heading); font-weight: 600; }
 
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-heading);
-    font-weight: 600;
-  }
-
-  /* Devanagari fallback so Hindi never renders in a default system serif */
   html[lang="hi"] body,
-  html[lang="hi"] h1,
-  html[lang="hi"] h2,
-  html[lang="hi"] h3,
-  html[lang="hi"] h4,
-  html[lang="hi"] h5,
-  html[lang="hi"] h6,
-  html[lang="hi"] button,
-  html[lang="hi"] input,
-  html[lang="hi"] select,
-  html[lang="hi"] textarea {
-    font-family:
-      "Poppins", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
+  html[lang="hi"] h1, html[lang="hi"] h2, html[lang="hi"] h3,
+  html[lang="hi"] h4, html[lang="hi"] h5, html[lang="hi"] h6,
+  html[lang="hi"] button, html[lang="hi"] input,
+  html[lang="hi"] select, html[lang="hi"] textarea {
+    font-family: "Poppins", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
   }
+  html[lang="hi"] h1, html[lang="hi"] h2, html[lang="hi"] h3 { letter-spacing: 0; line-height: 1.25; }
 
-  html[lang="hi"] h1,
-  html[lang="hi"] h2,
-  html[lang="hi"] h3 {
-    letter-spacing: 0;
-    line-height: 1.25;
-  }
-
-  :focus-visible {
-    outline: 2px solid var(--color-gold-400);
-    outline-offset: 3px;
-    border-radius: 8px;
-  }
-
+  :focus-visible { outline: 2px solid var(--color-gold-400); outline-offset: 3px; border-radius: 8px; }
   @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-    .animate-floaty,
-    .animate-marquee {
-      animation: none !important;
-    }
+    html { scroll-behavior: auto; }
+    .animate-marquee { animation: none !important; }
   }
-
-  ::selection {
-    background: rgba(212, 175, 55, 0.35);
-  }
-
-  ::-webkit-scrollbar {
-    width: 10px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #eaf1fa;
-  }
+  ::selection { background: rgba(212, 175, 55, 0.35); }
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: #eaf1fa; }
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #0f4c81, #175a99);
-    border-radius: 999px;
-    border: 2px solid #eaf1fa;
+    background: linear-gradient(180deg, #163b73, #1e4586);
+    border-radius: 999px; border: 2px solid #eaf1fa;
   }
 }
 
 @utility glass {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.82) 0%,
-    rgba(255, 255, 255, 0.55) 100%
-  );
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow: var(--shadow-glass);
+  background: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.55) 100%);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.7); box-shadow: var(--shadow-card);
 }
-
 @utility glass-dark {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.14) 0%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.18);
 }
-
 @utility text-gradient-gold {
   background: linear-gradient(100deg, #f4dc94 0%, #d4af37 45%, #f7e8b4 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-
 @utility text-gradient-blue {
-  background: linear-gradient(100deg, #0f4c81 0%, #2a6cb0 55%, #0f4c81 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  background: linear-gradient(100deg, #163b73 0%, #2956a6 55%, #163b73 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+@utility section-pad { padding-top: 5.5rem; padding-bottom: 5.5rem; }
+@media (max-width: 639px) { .section-pad { padding-top: 4rem; padding-bottom: 4rem; } }
+
+/* Tricolor stripe utility for official accents */
+.tricolor-stripe {
+  background: linear-gradient(90deg, #FF9933 0 33%, #ffffff 33% 66%, #138808 66% 100%);
+  height: 4px;
 }
 
-@utility section-pad {
-  padding-top: 5.5rem;
-  padding-bottom: 5.5rem;
-}
-
-@media (max-width: 639px) {
-  .section-pad {
-    padding-top: 4rem;
-    padding-bottom: 4rem;
-  }
-}
-
-@keyframes floaty {
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-22px) rotate(6deg);
-  }
-}
-
+/* Marquee for notice ticker */
 @keyframes marquee-x {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee-x 40s linear infinite; }
+
+/* Subtle Ashoka Chakra spin on hero */
+@keyframes slow-spin { to { transform: rotate(360deg); } }
+.animate-slow-spin { animation: slow-spin 24s linear infinite; }
+
+/* Card hover */
+.gov-card {
+  transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+}
+.gov-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 25px 50px -20px rgba(15, 76, 129, 0.35);
 }
 
-.animate-floaty {
-  animation: floaty 9s ease-in-out infinite;
+/* Loading spinner */
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid rgba(212,175,55,.25);
+  border-top-color: #d4af37;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Section eyebrow */
+.eyebrow {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-family: var(--font-heading);
+  font-size: .75rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--color-gov-600);
+}
+.eyebrow::before {
+  content: ""; width: 2rem; height: 2px; background: var(--color-saffron); display: inline-block;
 }
 
-.animate-marquee {
-  animation: marquee-x 28s linear infinite;
-}
-
-.grid-lines {
+.grid-pattern {
   background-image:
-    linear-gradient(rgba(15, 76, 129, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 76, 129, 0.06) 1px, transparent 1px);
-  background-size: 56px 56px;
+    linear-gradient(rgba(22,59,115,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22,59,115,0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Seal circle (for Ashoka Chakra emblems) */
+.seal-ring {
+  border: 3px solid var(--color-gold-400);
+  border-radius: 9999px;
+  padding: 3px;
 }
